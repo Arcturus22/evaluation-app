@@ -7,8 +7,8 @@ const Navbar = () => {
       <div className="text-xl text-white font-semibold p-5 pl-7">Evaluation Dashboard</div>
       <nav>
         <div className="flex items-center space-x-4 px-4">
-          <Button classes="" buttonName="Submit" to="" />
-          <Button classes="" buttonName="Logout" to="/" />
+          <Button classes="text-gray-100" buttonName="Submit" to="" />
+          <Button classes="text-gray-100" buttonName="Logout" to="/" />
         </div>
       </nav>
     </div>

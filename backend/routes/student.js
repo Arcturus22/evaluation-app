@@ -3,6 +3,21 @@ const router = express.Router();
 const Mentor = require("../models/Mentor");
 const Student = require("../models/Student");
 
+// Get all the students
+router.get("/allstudents", async (req, res) => {
+  try {
+    const allStudents = await Student.find();
+
+    if (!allStudents) {
+      res.status(400).json({ error: "No student found" });
+    }
+    res.status(200).json(allStudents);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Mentor adding a student
 router.post("/:mentorId/students/add", async (req, res) => {
   try {
