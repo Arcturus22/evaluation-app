@@ -1,6 +1,7 @@
 const express = require("express");
 const connectToMongo = require("./db");
 const cors = require("cors");
+const studentRoutes = require("./routes/student");
 
 const port = process.env.PORT || 8000;
 
@@ -14,6 +15,8 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Hello Sir");
 });
+
+app.use("/student", studentRoutes);
 
 //SERVER
 app.listen(port, () => {
