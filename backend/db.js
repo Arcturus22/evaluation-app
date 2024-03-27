@@ -1,6 +1,6 @@
 // Connect mongodb to our Node app in index.js
 const mongoose = require("mongoose");
-require("dotenv").config();
+
 
 const connectToMongo = async () => {
   mongoose

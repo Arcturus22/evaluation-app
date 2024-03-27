@@ -37,7 +37,7 @@ const marksSchema = new mongoose.Schema({
   ],
 });
 
-//Calculating the totalMarks before savingg
+//Calculating the totalMarks before saving
 marksSchema.pre("save", function (next) {
   let totalMarks = 0;
   for (const criterion of this.criteria) {

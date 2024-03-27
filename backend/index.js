@@ -1,7 +1,9 @@
 const express = require("express");
 const connectToMongo = require("./db");
 const cors = require("cors");
+require("dotenv").config();
 const studentRoutes = require("./routes/student");
+const marksRoutes = require("./routes/marks");
 
 const port = process.env.PORT || 8000;
 
@@ -17,6 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/student", studentRoutes);
+app.use("/marks", marksRoutes);
 
 //SERVER
 app.listen(port, () => {
