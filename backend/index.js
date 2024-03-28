@@ -1,4 +1,4 @@
-require("dotenv").config();
++require("dotenv").config();
 
 // mongo connection
 const connectToMongo = require("./db");
