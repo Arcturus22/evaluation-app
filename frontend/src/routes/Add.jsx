@@ -2,6 +2,7 @@ import Navbar from "../Components/Navbar";
 import { useEffect, useState } from "react";
 import TableRowComponent from "../Components/TableRow";
 import { fetchAllStudents } from "../utils/serverHelper";
+import EditMarksModal from "../modals/MarksModal";
 
 const AddComponent = () => {
   const [students, setStudents] = useState([]);
@@ -26,8 +27,9 @@ const AddComponent = () => {
       <Navbar />
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
+          
           <thead className="bg-gray-100">
-            <tr>
+            <tr >
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Roll No.
               </th>

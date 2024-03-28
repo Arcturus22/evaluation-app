@@ -3,7 +3,7 @@ import Button from "../utils/Button";
 
 const Navbar = () => {
   return (
-    <div className="flex items-center  bg-blue-700 justify-between py-3 border-b border-gray-400">
+    <div className="flex items-center  bg-blue-700 justify-between py-3 border-b  border-gray-400">
       <div className="text-xl text-white font-semibold p-5 pl-7">Evaluation Dashboard</div>
       <nav>
         <div className="flex items-center space-x-4 px-4">

@@ -1,24 +1,40 @@
 const express = require("express");
 const router = express.Router();
-const Mentor = require("../models/Mentor");
+
+const { body, validationResult } = require("express-validator");
+
 const Student = require("../models/Student");
 
-// Get all the students
-router.get("/allstudents", async (req, res) => {
-  try {
-    const allStudents = await Student.find();
-
-    if (!allStudents) {
-      res.status(400).json({ error: "No student found" });
+// create a new student in DB
+router.post("/createStudent", [
+    body("name", "Invalid name").exists(),
+    body("rollNo", "Invalid roll no.").exists(),
+    body("email", "Invalid email").isEmail()
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    
+        const { name, rollNo, email } = req.body;
+    
+        const student = await Student.findOne({ $or: [{ rollNo: rollNo }, { email: email }] });
+        if (student) return res.status(200).json({ error: "A student with same roll no./email already exists" });
+    
+        const newStudentData = { name, rollNo, email };
+        const newStudent = await Student.create(newStudentData);
+        return res.status(200).json(newStudent.toJSON());
     }
-    res.status(200).json(allStudents);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
-// Mentor adding a student
+
+
+const Mentor = require("../models/Mentor");
+
+// mentor adding a student
 router.post("/:mentorId/students/add", async (req, res) => {
   try {
     const mentorId = req.params.mentorId;

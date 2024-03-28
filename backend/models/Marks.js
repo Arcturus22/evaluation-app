@@ -1,47 +1,46 @@
 const mongoose = require("mongoose");
 
-//SCHEMA
 const marksSchema = new mongoose.Schema({
-  assignedByMentor: {
-    type: mongoose.Types.ObjectId,
-    ref: "Mentor",
-  },
-  assignedToStudent: {
-    type: mongoose.Types.ObjectId,
-    ref: "Student",
-  },
-  date: {
-    type: Date,
-    default: Date.now,
-    required: true,
-  },
-  totalMarks: {
-    type: Number,
-    min: 0,
-    default: 0,
-    max: 100,
-  },
-  criteria: [
+  assignedMarks: [
     {
-      name: {
+      parameter: {
         type: String,
-        enum: ["ideation", "viva", "execution"],
+        enum: ["ideation", "viva-pitch", "execution"],
         required: true,
       },
       marks: {
         type: Number,
         min: 0,
         max: 10,
+        required: true,
       },
     },
   ],
+  totalMarks: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 100,
+  },
+  assignedByMentor: {
+    type: mongoose.Types.ObjectId,
+    ref: "Mentor",
+    required: true,
+  },
+  assignedToStudent: {
+    type: mongoose.Types.ObjectId,
+    ref: "Student",
+    required: true,
+  },
+}, {
+  versionKey: false,
 });
 
-//Calculating the totalMarks before saving
+// calculate @totalMarks before saving
 marksSchema.pre("save", function (next) {
   let totalMarks = 0;
-  for (const criterion of this.criteria) {
-    totalMarks += criterion.marks;
+  for (const criterion of this.assignedMarks) {
+    totalMarks += assignedMarks.marks;
   }
   this.totalMarks = totalMarks;
   next();

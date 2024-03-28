@@ -1,16 +1,16 @@
 const mongoose = require("mongoose");
 
-//SCHEMA
 const studentSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
-  },
-  lastName: {
+  name: {
     type: String,
     required: true,
   },
   rollNo: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  email: {
     type: String,
     required: true,
     unique: true,
@@ -23,15 +23,8 @@ const studentSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: "Marks",
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  department: {
-    type: String,
-    required: true,
-  },
+}, {
+  versionKey: false,
 });
 
 const studentModel = mongoose.model("Student", studentSchema);

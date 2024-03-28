@@ -1,27 +1,26 @@
-const express = require("express");
-const connectToMongo = require("./db");
-const cors = require("cors");
 require("dotenv").config();
-const studentRoutes = require("./routes/student");
-const marksRoutes = require("./routes/marks");
 
-const port = process.env.PORT || 8000;
-
-//Mongo Connection
+// mongo connection
+const connectToMongo = require("./db");
 connectToMongo();
+
+const express = require("express");
 const app = express();
+const cors = require("cors");
 
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Hello Sir");
-});
+const mentorRoutes = require("./routes/mentor");
+const studentRoutes = require("./routes/student");
+const marksRoutes = require("./routes/marks");
 
+app.use("/mentor", mentorRoutes);
 app.use("/student", studentRoutes);
 app.use("/marks", marksRoutes);
 
-//SERVER
+// server
+const port = process.env.PORT;
 app.listen(port, () => {
-  console.log("Server Running on Port: " + port);
+    console.log("Node server running on port: " + port);
 });

@@ -1,21 +1,20 @@
-// Connect mongodb to our Node app in index.js
 const mongoose = require("mongoose");
 
-
+// connects mongodb to our node app in index.js
 const connectToMongo = async () => {
   mongoose
     .connect(
       "mongodb+srv://" +
-        process.env.MONGO_USERNAME +
-        ":" +
-        process.env.MONGO_PASSWORD +
-        "@cluster0.fgbii.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+      process.env.MONGO_USERNAME +
+      ":" +
+      process.env.MONGO_PASSWORD +
+      "@cluster0.fgbii.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
     )
-    .then((x) => {
-      console.log("---- Successfully Connected to Mongo ----");
+    .then(() => {
+      console.log("SUCCESS: Connected to mongo");
     })
     .catch((err) => {
-      console.log("---- Error while connecting to mongo ----", err);
+      console.log("ERROR: Couldn't connect to mongo", err);
     });
 };
 

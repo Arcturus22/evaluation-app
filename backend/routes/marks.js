@@ -1,7 +1,40 @@
 const express = require("express");
 const router = express.Router();
-const Student = require("../models/Student");
+
+const { body, validationResult } = require("express-validator");
+
 const Marks = require("../models/Marks");
+const Mentor = require("../models/Mentor");
+const Student = require("../models/Student");
+
+// create a new marks entry in DB
+req.post("/createMarks", [
+    body("assignedByMentor", "Invalid mentor").exists(),
+    body("assignedToStudent", "Invalid student").exists(),
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+        const { assignedMarks, assignedByMentor, assignedToStudent } = req.body;
+
+        const marks = await Marks.findOne({ $and: [{ assignedByMentor: assignedByMentor }, { assignedToStudent: assignedToStudent }] });
+        if (marks) return res.status(200).json({ error: "This mentor has already assigned marks to this student" });
+
+        const newMarks = await Marks.create({ assignedMarks, assignedByMentor, assignedToStudent });
+    
+        res.status(200).json(newMarks.toJSON());
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+
+
+
+const Student = require("../models/Student");
 
 // Marks updation
 router.post("/:studentId/marks/update", async (req, res) => {
