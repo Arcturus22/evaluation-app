@@ -13,7 +13,8 @@ export const fetchAllStudents = async () => {
     throw error;
   }
 };
-// Fetch assinged students
+
+// Fetch assigned students
 export const fetchAssignedStudents = async () => {
   try {
     const response = await axios.get(`${backendUrl}/student/allstudents`);

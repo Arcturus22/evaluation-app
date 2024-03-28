@@ -3,6 +3,7 @@ const router = express.Router();
 
 const { body, validationResult } = require("express-validator");
 
+const Mentor = require("../models/Mentor");
 const Student = require("../models/Student");
 
 // create a new student in DB
@@ -31,8 +32,21 @@ router.post("/createStudent", [
 });
 
 
+// Get all the students
+router.get("/allstudents", async (req, res) => {
+  try {
+    const allStudents = await Student.find();
 
-const Mentor = require("../models/Mentor");
+    if (!allStudents) {
+      res.status(400).json({ error: "No student found" });
+    }
+    res.status(200).json(allStudents);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 // mentor adding a student
 router.post("/:mentorId/students/add", async (req, res) => {
