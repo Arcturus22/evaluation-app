@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../Components/Navbar";
 import TableRowComponent from "../Components/TableRow";
-import { fetchAssignedStudents } from "../utils/serverHelper";
 import EditMarksModal from "../modals/MarksModal";
+import { fetchAssignedStudents } from "../utils/serverHelper";
 
 const ViewComponent = () => {
   const [students, setStudents] = useState([]);
@@ -13,12 +13,13 @@ const ViewComponent = () => {
       try {
         const assignedStudents = await fetchAssignedStudents();
         setStudents(assignedStudents);
-      } catch (error) {
-        console.error("Error fetching students:", error);
+      } catch (err) {
+        console.error(err);
       }
     };
 
     fetchStudents();
+    console.log("/view rendered");
   }, []);
 
   const handleAssignMarks = (student) => {
@@ -43,23 +44,26 @@ const ViewComponent = () => {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-slate-50 divide-y divide-gray-200 w-full ">
+          <tbody className="bg-slate-50 divide-y divide-gray-200 w-full">
             {students.map((student) => (
-              <TableRowComponent
+              <
+                TableRowComponent
                 key={student._id}
+                route="view"
                 student={student}
                 buttonA="Delete"
                 buttonB="Assign Marks"
-                onAssignMarks={handleAssignMarks} // Pass the function to handle Assign Marks button click
+                onAssignMarks={handleAssignMarks}
               />
             ))}
           </tbody>
         </table>
       </div>
       {selectedStudent && (
-        <EditMarksModal
+        <
+          EditMarksModal
           student={selectedStudent}
-          onClose={() => setSelectedStudent(null)} // Close the modal when needed
+          onClose={() => setSelectedStudent(null)}
         />
       )}
     </div>

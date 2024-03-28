@@ -1,29 +1,46 @@
 import axios from "axios";
-import { backendUrl } from "./config";
+import { SERVER_URL, CURRENT_MENTOR_ID } from "./config";
 
-// Fetch all Students
-export const fetchAllStudents = async () => {
+// fetch unassigned students
+export const fetchUnasignedStudents = async () => {
   try {
-    const response = await axios.get(`${backendUrl}/student/allstudents`);
-
-    console.log(response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching students:", error);
-    throw error;
+    const res = await axios.get(`${SERVER_URL}/student/unassignedStudents`);
+    // console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error(err);
   }
 };
 
-// Fetch assigned students
+// fetch assigned students
 export const fetchAssignedStudents = async () => {
   try {
-    const response = await axios.get(`${backendUrl}/student/allstudents`);
-
-    console.log(response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching students:", error);
-    throw error;
+    const res = await axios.get(`${SERVER_URL}/student/${CURRENT_MENTOR_ID}/assignedStudents`);
+    // console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error(err);
   }
 };
 
+// assign marks
+export const assignMarks = async (assignedMarks, assignedToStudent) => {
+  try {
+    const res = await axios.get(`${SERVER_URL}/marks/${CURRENT_MENTOR_ID}/assignMarks`, { assignedMarks, assignedToStudent });
+    // console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+// update marks
+export const updateMarks = async (assignedMarks, assignedToStudent) => {
+  try {
+    const res = await axios.get(`${SERVER_URL}/marks/${CURRENT_MENTOR_ID}/updateMarks`, { assignedMarks, assignedToStudent });
+    // console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+  }
+};
