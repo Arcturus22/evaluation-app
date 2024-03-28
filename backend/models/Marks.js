@@ -5,10 +5,10 @@ const marksSchema = new mongoose.Schema({
     {
       parameter: {
         type: String,
-        enum: ["ideation", "viva-pitch", "execution"],
+        enum: ["ideation", "execution", "viva-pitch", "presentation"],
         required: true,
       },
-      marks: {
+      marksVal: {
         type: Number,
         min: 0,
         max: 10,
@@ -19,8 +19,10 @@ const marksSchema = new mongoose.Schema({
   totalMarks: {
     type: Number,
     default: 0,
-    min: 0,
-    max: 100,
+  },
+  maximumMarks: {
+    type: Number,
+    default: 40,
   },
   assignedByMentor: {
     type: mongoose.Types.ObjectId,
@@ -36,11 +38,11 @@ const marksSchema = new mongoose.Schema({
   versionKey: false,
 });
 
-// calculate @totalMarks before saving
+// calculate totalMarks before saving
 marksSchema.pre("save", function (next) {
   let totalMarks = 0;
-  for (const criterion of this.assignedMarks) {
-    totalMarks += assignedMarks.marks;
+  for (const i of this.assignedMarks) {
+    totalMarks += i.marksVal;
   }
   this.totalMarks = totalMarks;
   next();

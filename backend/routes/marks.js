@@ -1,176 +1,195 @@
 const express = require("express");
 const router = express.Router();
 
-const { body, validationResult } = require("express-validator");
-
 const Marks = require("../models/Marks");
 const Mentor = require("../models/Mentor");
 const Student = require("../models/Student");
 
+/*
+// helper func
+const isValidAassignedMarks = (assignedMarks) => {
+  let isValid = true;
+
+  if (!Array.isArray(assignedMarks)) {
+    isValid = false;
+  }
+
+  for (const item of assignedMarks) {
+    if (!(typeof item === 'object' &&
+      Object.keys(item).length === 2 &&
+      item.hasOwnProperty('parameter') &&
+      typeof item.parameter === 'string' &&
+      item.hasOwnProperty('marks') &&
+      typeof item.marks === 'number')) {
+
+      isValid = false;
+      break;
+    }
+  }
+
+  if (assignedMarks.length !== 4) {
+    isValid = false;
+  }
+
+  const parameterValues = ["ideation", "execution", "viva-pitch", "presentation"];
+
+  for (const item of assignedMarks) {
+    const { parameter, marks } = item;
+
+    if(!(parameterValues.includes(parameter) && 0 <= marks && marks <= 10)) {
+      isValid = false;
+      break;
+    }
+  }
+  
+  return isValid;
+};
+*/
+
 // create a new marks entry in DB
-req.post("/createMarks", [
-    body("assignedByMentor", "Invalid mentor").exists(),
-    body("assignedToStudent", "Invalid student").exists(),
-], async (req, res) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-        const { assignedMarks, assignedByMentor, assignedToStudent } = req.body;
-
-        const marks = await Marks.findOne({ $and: [{ assignedByMentor: assignedByMentor }, { assignedToStudent: assignedToStudent }] });
-        if (marks) return res.status(200).json({ error: "This mentor has already assigned marks to this student" });
-
-        const newMarks = await Marks.create({ assignedMarks, assignedByMentor, assignedToStudent });
-    
-        res.status(200).json(newMarks.toJSON());
-    }
-    catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal server error" });
-    }
+router.post("/createMarks", async (req, res) => {
+  try {
+    const { assignedMarks, assignedByMentor, assignedToStudent } = req.body;
+    const mentor = await Mentor.findById(assignedByMentor);
+    const student = await Student.findById(assignedToStudent);
+    if (!mentor)
+      return res.status(400).json({ error: "Mentor not found" });
+    if (!student)
+      return res.status(400).json({ error: "Student not found" });
+    if (!(student.assignedMentor && student.assignedMentor.equals(assignedByMentor)))
+      return res.status(200).json({ error: "Student not assigned to this mentor" });
+    const marks = await Marks.findOne({ $and: [{ assignedByMentor: assignedByMentor }, { assignedToStudent: assignedToStudent }] });
+    if (marks)
+      return res.status(400).json({ error: "Mentor already assigned marks to this student" });
+    const newMarks = await Marks.create({ assignedMarks, assignedByMentor, assignedToStudent });
+    return res.status(200).json({ newMarks });
+  }
+  catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 });
 
-
-
-
-const Student = require("../models/Student");
-
-// Marks updation
-router.post("/:studentId/marks/update", async (req, res) => {
+// assign marks
+router.post("/:mentorId/assignMarks", async (req, res) => {
   try {
-    const { studentId } = req.params.studentId;
-    const { criteria } = req.body;
-
-    const student = await Student.findOne({ _id: studentId });
-
-    if (!student) {
-      return res.status(404).json({ error: "Student not found" });
-    }
-    const mentorId = student.assignedMentor;
-
-    const newMarks = new Marks({
-      assignedByMentor: mentorId,
-      assignedToStudent: studentId,
-      criteria,
-    });
-
-    await newMarks.save();
-
-    student.assignedMarks = newMarks._id;
-    await student.save();
-
-    return res
-      .status(200)
-      .json({ message: "Marks updated successfully", newMarks });
-  } catch (error) {
-    console.error(error);
+    const { assignedByMentor } = req.params;
+    const { assignedMarks, assignedToStudent } = req.body;
+    const mentor = await Mentor.findById(assignedByMentor);
+    const student = await Student.findById(assignedToStudent);
+    if (!mentor)
+      return res.status(400).json({ error: "Mentor not found" });
+    if (!student)
+      return res.status(400).json({ error: "Student not found" });
+    if (!(student.assignedMentor && student.assignedMentor.equals(assignedByMentor)))
+      return res.status(200).json({ error: "Student not assigned to this mentor" });
+    const marks = await Marks.findOne({ $and: [{ assignedByMentor: assignedByMentor }, { assignedToStudent: assignedToStudent }] });
+    if (marks)
+      return res.status(400).json({ error: "Mentor already assigned marks to this student" });
+    const newMarks = await Marks.create({ assignedMarks, assignedByMentor, assignedToStudent });
+    return res.status(200).json({ newMarks });
+  }
+  catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Editing Marks
-router.post("/:studentId/marks/edit", async (req, res) => {
+// update marks
+router.post("/:mentorId/updateMarks", async (req, res) => {
   try {
-    const { studentId } = req.params.studentId;
-    const { criteria } = req.body;
-
-    const student = await Student.findOne({ _id: studentId }).populate(
-      "assignedMarks"
-    );
-
-    if (!student) {
+    const { mentorId } = req.params;
+    const { assignedMarks, studentId } = req.body;
+    const mentor = await Mentor.findById(mentorId);
+    if (!mentor)
+      return res.status(404).json({ error: "Mentor not found" });
+    const student = await Student.findById(studentId);
+    if (!student)
       return res.status(404).json({ error: "Student not found" });
-    }
-
-    const marks = student.assignedMarks;
-    marks.criteria = criteria;
-
-    await marks.save();
-
-    return res
-      .status(200)
-      .json({ message: "Marks updated successfully", marks });
-  } catch (error) {
-    console.error(error);
+    if (!(student.assignedMentor && student.assignedMentor.equals(mentorId)))
+      return res.status(400).json({ error: "Student not assigned to this mentor" });
+    const marks = await Marks.findOne({ $and: [{ assignedByMentor: mentorId }, { assignedToStudent: studentId }] });
+    if (!marks)
+      return res.status(400).json({ error: "Mentor hasn't assigned marks to this student" });
+    const newMarks = await Marks.findOneAndUpdate(
+      { assignedByMentor: mentorId, assignedToStudent: studentId },
+      { assignedMarks },
+      { new: true },
+    );
+    return res.status(200).json(newMarks.toJSON());
+  }
+  catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Filter for Students with unassigned Marks
-router.get("/:mentorId/students", async (req, res) => {
+// remove marks
+router.post("/:mentorId/removeMarks", async (req, res) => {
   try {
-    const mentorId = req.params.mentorId;
-
-    const mentor = await Mentor.findOne({ _id: mentorId }).populate(
-      "assignedStudents"
-    );
-
-    if (!mentor) {
+    const { mentorId } = req.params;
+    const { studentId } = req.body;
+    const mentor = await Mentor.findById(mentorId);
+    if (!mentor)
       return res.status(404).json({ error: "Mentor not found" });
-    }
-
-    const assignedStudents = mentor.assignedStudents;
-    const studentsWithoutMarks = [];
-    for (const student of assignedStudents) {
-      const marks = await Marks.findOne({
-        assignedToStudent: student._id,
-      }).catch((error) => {
-        console.error("Error retrieving marks:", error);
-        return null;
-      });
-
-      if (!marks) {
-        studentsWithoutMarks.push(student);
-      }
-    }
-
-    return res
-      .status(200)
-      .json({ students: studentsWithoutMarks.filter(Boolean) });
-      
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    const student = await Student.findById(studentId);
+    if (!student)
+      return res.status(404).json({ error: "Student not found" });
+    if (!(student.assignedMentor && student.assignedMentor.equals(mentorId)))
+      return res.status(400).json({ error: "Student not assigned to this mentor" });
+    const marks = await Marks.findOne({ $and: [{ assignedByMentor: mentorId }, { assignedToStudent: studentId }] });
+    if (!marks)
+      return res.status(400).json({ error: "This mentor hasn't assigned marks to this student" });
+    await Marks.findOneAndDelete({ $and: [{ assignedByMentor: mentorId }, { assignedToStudent: studentId }] });
+    return res.status(200).json({ success: "Marks deleted successfully" });
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-
-// Filter for Students with assigned Marks
-router.get("/:mentorId/students", async (req, res) => {
+// filter for students with assigned marks
+router.get("/:mentorId/assignedMarksStudents", async (req, res) => {
   try {
-    const mentorId = req.params.mentorId;
-
-    const mentor = await Mentor.findOne({ _id: mentorId }).populate(
-      "assignedStudents"
-    );
-
-    if (!mentor) {
+    const { mentorId } = req.params;
+    const mentor = await Mentor.findById(mentorId).populate("assignedStudents");
+    if (!mentor)
       return res.status(404).json({ error: "Mentor not found" });
-    }
-
     const assignedStudents = mentor.assignedStudents;
-    const studentsWithMarks = [];
+    const assignedMarksStudents = [];
     for (const student of assignedStudents) {
-      const marks = await Marks.findOne({
-        assignedToStudent: student._id,
-      }).catch((error) => {
-        console.error("Error retrieving marks:", error);
-        return null;
-      });
-
-      if (marks) {
-        studentsWithMarks.push(student);
-      }
+      const marks = await Marks.findOne({ $and: [{ assignedByMentor: mentorId }, { assignedToStudent: student._id }] });
+      if (marks)
+        assignedMarksStudents.push(student);
     }
+    return res.status(200).json({ assignedMarksStudents });
+  }
+  catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
-    return res
-      .status(200)
-      .json({ students: studentsWithMarks });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+// filter for students with unassigned marks
+router.get("/:mentorId/unassignedMarksStudents", async (req, res) => {
+  try {
+    const { mentorId } = req.params;
+    const mentor = await Mentor.findById(mentorId).populate("assignedStudents");
+    if (!mentor)
+      return res.status(404).json({ error: "Mentor not found" });
+    const assignedStudents = mentor.assignedStudents;
+    const unassignedMarksStudents = [];
+    for (const student of assignedStudents) {
+      const marks = await Marks.findOne({ $and: [{ assignedByMentor: mentorId }, { assignedToStudent: student._id }] });
+      if (!marks)
+        unassignedMarksStudents.push(student);
+    }
+    return res.status(200).json({ unassignedMarksStudents });
+  }
+  catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

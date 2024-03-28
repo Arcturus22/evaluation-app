@@ -18,11 +18,8 @@ const studentSchema = new mongoose.Schema({
   assignedMentor: {
     type: mongoose.Types.ObjectId,
     ref: "Mentor",
-  },
-  assignedMarks: {
-    type: mongoose.Types.ObjectId,
-    ref: "Marks",
-  },
+    default: null,
+  }
 }, {
   versionKey: false,
 });
