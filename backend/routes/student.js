@@ -107,7 +107,7 @@ router.post("/:mentorId/editStudent", async (req, res) => {
     await oldStudent.save();
     newStudent.assignedMentor = mentorId;
     await newStudent.save();
-    await axios.post(`~/marks/${mentorId}/removeMarks`, { oldStudentId }); // ---
+    await axios.post(`/marks/${mentorId}/removeMarks`, { oldStudentId }); // ---
     return res.status(200).json({ mentor, oldStudent, newStudent });
   }
   catch (err) {
